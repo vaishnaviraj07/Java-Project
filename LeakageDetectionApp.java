@@ -29,7 +29,7 @@ public class LeakageDetectionApp extends JFrame {
     };
 
     public LeakageDetectionApp() {
-        setTitle("AquaWatch | Water Monitor");
+        setTitle("Leakage Detection | Water Monitor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(820, 620));
         getContentPane().setBackground(new Color(245, 248, 251));
@@ -61,7 +61,7 @@ public class LeakageDetectionApp extends JFrame {
         JLabel eyebrow = new JLabel("WATER USAGE OVERVIEW");
         eyebrow.setFont(new Font("SansSerif", Font.BOLD, 11));
         eyebrow.setForeground(BLUE);
-        JLabel title = new JLabel("AquaWatch");
+        JLabel title = new JLabel("Leakage Detection");
         title.setFont(new Font("SansSerif", Font.BOLD, 30));
         title.setForeground(NAVY);
         JLabel subtitle = new JLabel("Track consumption and catch unusual usage early.");
