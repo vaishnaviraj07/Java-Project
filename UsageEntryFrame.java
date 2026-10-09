@@ -1,27 +1,32 @@
+
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class UsageEntryFrame extends JFrame {
 
-    JTextField dateField;
-    JTextField initialField;
-    JTextField consumedField;
-    JTextField remainingField;
-    JTextField leakageAmountField;
+    private JTextField dateField;
+    private JTextField initialField;
+    private JTextField consumedField;
+    private JTextField remainingField;
+    private JTextField leakageAmountField;
 
-    JComboBox<String> liquidBox;
-    JComboBox<String> leakageDetectionBox;
-    JComboBox<String> leakageStatusBox;
+    private JComboBox<String> liquidBox;
+    private JComboBox<String> leakageDetectionBox;
+    private JComboBox<String> leakageStatusBox;
 
     public UsageEntryFrame() {
 
         setTitle("Usage Entry");
-        setSize(500, 550);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(520, 580);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(0, 2, 10, 10));
+        JPanel panel = new JPanel(
+                new GridLayout(0, 2, 10, 10)
+        );
+
         panel.setBorder(
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         );
@@ -29,22 +34,15 @@ public class UsageEntryFrame extends JFrame {
         // Liquid Type
         panel.add(new JLabel("Liquid Type:"));
 
-        liquidBox = new JComboBox<>(
-                new String[]{
-                        "Water",
-                        "Fuel",
-                        "Oil",
-                        "Chemical",
-                        "Other"
-                }
-        );
-
+        liquidBox = new JComboBox<>(new String[]{
+                "Water", "Fuel", "Oil", "Chemical", "Other"
+        });
         panel.add(liquidBox);
 
         // Date
-        panel.add(new JLabel("Date:"));
+        panel.add(new JLabel("Date (yyyy-MM-dd):"));
 
-        dateField = new JTextField();
+        dateField = new JTextField(LocalDate.now().toString());
         panel.add(dateField);
 
         // Initial Quantity
@@ -70,18 +68,14 @@ public class UsageEntryFrame extends JFrame {
         panel.add(new JLabel("Leakage Detection:"));
 
         leakageDetectionBox = new JComboBox<>(
-                new String[]{
-                        "No",
-                        "Yes"
-                }
+                new String[]{"No", "Yes"}
         );
-
         panel.add(leakageDetectionBox);
 
         // Leakage Amount
         panel.add(new JLabel("Leakage Amount (L):"));
 
-        leakageAmountField = new JTextField();
+        leakageAmountField = new JTextField("0");
         panel.add(leakageAmountField);
 
         // Leakage Status
@@ -94,7 +88,6 @@ public class UsageEntryFrame extends JFrame {
                         "Leak Detected"
                 }
         );
-
         panel.add(leakageStatusBox);
 
         // Save button
@@ -105,68 +98,216 @@ public class UsageEntryFrame extends JFrame {
 
         add(panel);
 
-        // Calculate remaining quantity
-        consumedField.addActionListener(e -> calculateRemaining());
+        // Update remaining quantity when values change
         initialField.addActionListener(e -> calculateRemaining());
+        consumedField.addActionListener(e -> calculateRemaining());
+        leakageAmountField.addActionListener(e -> calculateRemaining());
 
-        // Save button
+        // Keep leakage information consistent
+        leakageDetectionBox.addActionListener(e -> {
+            if ("No".equals(leakageDetectionBox.getSelectedItem())) {
+                leakageAmountField.setText("0");
+                leakageStatusBox.setSelectedItem("Normal");
+            } else if ("Normal".equals(
+                    leakageStatusBox.getSelectedItem())) {
+                leakageStatusBox.setSelectedItem("Suspected Leak");
+            }
+            calculateRemaining();
+        });
+
+        leakageStatusBox.addActionListener(e -> {
+            if ("Suspected Leak".equals(
+                    leakageStatusBox.getSelectedItem())
+                    || "Leak Detected".equals(
+                    leakageStatusBox.getSelectedItem())) {
+                leakageDetectionBox.setSelectedItem("Yes");
+            }
+        });
+
         saveButton.addActionListener(e -> saveData());
     }
 
-    private void calculateRemaining() {
+    // Parse and validate a non-negative quantity
+    private double readQuantity(JTextField field, String name)
+            throws IllegalArgumentException {
+
+        String value = field.getText().trim();
+
+        if (value.isEmpty()) {
+            throw new IllegalArgumentException(
+                    name + " is required."
+            );
+        }
 
         try {
+            double quantity = Double.parseDouble(value);
 
-            double initial =
-                    Double.parseDouble(initialField.getText());
-
-            double consumed =
-                    Double.parseDouble(consumedField.getText());
-
-            double remaining = initial - consumed;
-
-            if (remaining < 0) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Consumed quantity cannot be greater than initial quantity."
+            if (!Double.isFinite(quantity) || quantity < 0) {
+                throw new IllegalArgumentException(
+                        name + " must be a non-negative number."
                 );
-
-                remainingField.setText("");
-                return;
             }
+
+            return quantity;
+
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(
+                    name + " must be a valid number."
+            );
+        }
+    }
+
+    // Calculate remaining quantity after consumption and leakage
+    private boolean calculateRemaining() {
+
+        try {
+            double initial = readQuantity(
+                    initialField, "Initial quantity"
+            );
+
+            double consumed = readQuantity(
+                    consumedField, "Consumed quantity"
+            );
+
+            double leakage = readQuantity(
+                    leakageAmountField, "Leakage amount"
+            );
+
+            if (consumed > initial) {
+                remainingField.setText("");
+                return false;
+            }
+
+            if (leakage > initial - consumed) {
+                remainingField.setText("");
+                return false;
+            }
+
+            double remaining = initial - consumed - leakage;
 
             remainingField.setText(
                     String.format("%.2f", remaining)
             );
 
-        } catch (NumberFormatException ex) {
+            return true;
 
+        } catch (IllegalArgumentException ex) {
             remainingField.setText("");
+            return false;
         }
     }
 
+    // Validate and save the entry
     private void saveData() {
 
-        if (dateField.getText().isEmpty()
-                || initialField.getText().isEmpty()
-                || consumedField.getText().isEmpty()) {
+        try {
+            // Validate date
+            LocalDate.parse(dateField.getText().trim());
 
+        } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Please fill in all required fields.",
-                    "Input Error",
+                    "Enter a valid date in yyyy-MM-dd format.",
+                    "Date Error",
                     JOptionPane.WARNING_MESSAGE
             );
-
+            dateField.requestFocus();
             return;
         }
 
+        double initial;
+        double consumed;
+        double leakage;
+
+        try {
+            initial = readQuantity(
+                    initialField, "Initial quantity"
+            );
+
+            consumed = readQuantity(
+                    consumedField, "Consumed quantity"
+            );
+
+            leakage = readQuantity(
+                    leakageAmountField, "Leakage amount"
+            );
+
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Input Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        if (consumed > initial) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Consumed quantity cannot exceed initial quantity.",
+                    "Quantity Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        if (leakage > initial - consumed) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Leakage amount cannot exceed the available quantity.",
+                    "Leakage Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        String detection =
+                (String) leakageDetectionBox.getSelectedItem();
+
+        String status =
+                (String) leakageStatusBox.getSelectedItem();
+
+        if ("No".equals(detection)) {
+            if (leakage > 0 || !"Normal".equals(status)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "When leakage detection is No, "
+                                + "leakage must be 0 and status must be Normal.",
+                        "Leakage Validation",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+        } else if (leakage > 0 && "Normal".equals(status)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "A positive leakage amount cannot have Normal status.",
+                    "Leakage Validation",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        // Update remaining quantity only after validation
         calculateRemaining();
+
+        // Display saved entry details
+        String message =
+                "Usage entry validated successfully!\n\n"
+                + "Liquid: " + liquidBox.getSelectedItem() + "\n"
+                + "Date: " + dateField.getText().trim() + "\n"
+                + "Initial Quantity: " + initial + " L\n"
+                + "Consumed Quantity: " + consumed + " L\n"
+                + "Leakage Amount: " + leakage + " L\n"
+                + "Remaining Quantity: "
+                + remainingField.getText() + " L\n"
+                + "Leakage Detection: " + detection + "\n"
+                + "Leakage Status: " + status;
 
         JOptionPane.showMessageDialog(
                 this,
-                "Usage entry saved successfully!",
+                message,
                 "Success",
                 JOptionPane.INFORMATION_MESSAGE
         );
@@ -175,10 +316,7 @@ public class UsageEntryFrame extends JFrame {
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(() -> {
-
-            UsageEntryFrame frame =
-                    new UsageEntryFrame();
-
+            UsageEntryFrame frame = new UsageEntryFrame();
             frame.setVisible(true);
         });
     }
