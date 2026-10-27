@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Liquid Consumption System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="true">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <span class="brand-icon">💧</span>
+            <div>
+                <h2>Liquid Monitor</h2>
+                <p>Smart Management</p>
+            </div>
+        </div>
+
+        <p class="menu-label">MAIN MENU</p>
+
+        <nav class="navigation">
+            <button class="nav-link active" data-page="dashboard">
+                <span>▦</span> Dashboard
+            </button>
+            <button class="nav-link" data-page="registration">
+                <span>＋</span> Liquid Registration
+            </button>
+            <button class="nav-link" data-page="usage">
+                <span>↗</span> Usage Entry
+            </button>
+            <button class="nav-link" data-page="calculator">
+                <span>⌗</span> Consumption Calculator
+            </button>
+            <button class="nav-link" data-page="leak">
+                <span>⚠</span> Leak Detection
+            </button>
+            <button class="nav-link" data-page="reports">
+                <span>▤</span> Reports
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="status-dot"></span> System Ready
+        </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">SMART LIQUID MANAGEMENT</p>
+                <h2>Liquid Monitor</h2>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Reset Session</button>
+        </header>
+
+        <section class="page active" id="dashboard">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">OVERVIEW</p>
+                    <h1>Dashboard</h1>
+                    <p class="muted">Welcome to the Smart Liquid Consumption and Leak Detection System.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>Registered Liquids</span><span class="stat-icon">💧</span>
+                    </div>
+                    <h2 id="registeredCount">0</h2>
+                    <p class="muted">Total registered containers</p>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>Total Consumption</span><span class="stat-icon">↗</span>
+                    </div>
+                    <h2 id="totalConsumption">0.00 L</h2>
+                    <p class="muted">Recorded usage</p>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span>System Status</span><span class="stat-icon">◉</span>
+                    </div>
+                    <h2 id="systemStatus" class="status-normal">Normal</h2>
+                    <p class="muted" id="statusDescription">No high usage recorded</p>
+                </article>
+            </div>
+
+            <div class="content-card">
+                <div class="section-heading">
+                    <div>
+                        <h2>Recent Usage</h2>
+                        <p class="muted">Latest consumption entries</p>
+                    </div>
+                    <button class="secondary-btn" data-go="reports">View Reports</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Liquid</th>
+                                <th>Container ID</th>
+                                <th>Previous (L)</th>
+                                <th>Current (L)</th>
+                                <th>Used (L)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentUsageBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">No usage entries yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="registration">
+            <div class="page-heading">
+                <p class="eyebrow">MANAGE CONTAINERS</p>
+                <h1>Liquid Registration</h1>
+                <p class="muted">Register a liquid and its container details.</p>
+            </div>
+
+            <div class="content-card form-card">
+                <h2>Register New Liquid</h2>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="liquidName">Liquid Name</label>
+                        <input id="liquidName" required maxlength="50" placeholder="e.g. Water">
+                    </div>
+                    <div class="form-group">
+                        <label for="containerId">Container ID</label>
+                        <input id="containerId" required maxlength="30" placeholder="e.g. TANK-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="capacity">Container Capacity (L)</label>
+                        <input id="capacity" type="number" min="0.01" step="any" required placeholder="e.g. 500">
+                    </div>
+                    <button class="primary-btn" type="submit">Register Liquid</button>
+                </form>
+                <p id="registrationMessage" class="message" aria-live="polite"></p>
+            </div>
+
+            <div class="content-card">
+                <h2>Registered Containers</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Liquid</th>
+                                <th>Container ID</th>
+                                <th>Capacity (L)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liquidTableBody">
+                            <tr>
+                                <td colspan="3" class="empty-state">No containers registered.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="usage">
+            <div class="page-heading">
+                <p class="eyebrow">RECORD CONSUMPTION</p>
+                <h1>Usage Entry</h1>
+                <p class="muted">Enter previous and current readings to calculate usage.</p>
+            </div>
+
+            <div class="content-card form-card">
+                <h2>New Usage Record</h2>
+                <form id="usageForm">
+                    <div class="form-group">
+                        <label for="usageContainer">Container</label>
+                        <select id="usageContainer" required>
+                            <option value="">Register a container first</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="previousReading">Previous Reading (L)</label>
+                        <input id="previousReading" type="number" min="0" step="any" required placeholder="e.g. 300">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentReading">Current Reading (L)</label>
+                        <input id="currentReading" type="number" min="0" step="any" required placeholder="e.g. 250">
+                    </div>
+                    <button class="primary-btn" type="submit">Save Usage</button>
+                </form>
+                <p id="usageMessage" class="message" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <section class="page" id="calculator">
+            <div class="page-heading">
+                <p class="eyebrow">QUICK CALCULATION</p>
+                <h1>Consumption Calculator</h1>
+                <p class="muted">Calculate liquid consumption from two readings.</p>
+            </div>
+
+            <div class="content-card form-card">
+                <h2>Calculate Usage</h2>
+                <form id="calculatorForm">
+                    <div class="form-group">
+                        <label for="calcPrevious">Previous Reading (L)</label>
+                        <input id="calcPrevious" type="number" min="0" step="any" required
+                            placeholder="Enter previous reading">
+                    </div>
+                    <div class="form-group">
+                        <label for="calcCurrent">Current Reading (L)</label>
+                        <input id="calcCurrent" type="number" min="0" step="any" required
+                            placeholder="Enter current reading">
+                    </div>
+                    <button class="primary-btn" type="submit">Calculate</button>
+                </form>
+                <div class="result-box" id="calculatorResult" aria-live="polite">
+                    <span>Consumption Result</span>
+                    <strong>—</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="leak">
+            <div class="page-heading">
+                <p class="eyebrow">USAGE MONITORING</p>
+                <h1>Leak Detection</h1>
+                <p class="muted">Review high-consumption entries that may need inspection.</p>
+            </div>
+
+            <div class="notice-card">
+                <span class="notice-icon">ⓘ</span>
+                <div>
+                    <h3>Demo anomaly check</h3>
+                    <p>This website flags recorded usage of 50 L or more for review. This is only a basic rule, not real
+                        sensor-based leak detection.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2>Entries Requiring Review</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Container</th>
+                                <th>Liquid</th>
+                                <th>Usage (L)</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="anomalyTableBody">
+                            <tr>
+                                <td colspan="4" class="empty-state">No entries to review.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="reports">
+            <div class="page-heading">
+                <p class="eyebrow">ACTIVITY SUMMARY</p>
+                <h1>Reports</h1>
+                <p class="muted">Review all recorded consumption entries.</p>
+            </div>
+
+            <div class="content-card">
+                <div class="section-heading">
+                    <h2>Usage Report</h2>
+                    <button class="secondary-btn" id="exportBtn">Download CSV</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Liquid</th>
+                                <th>Container ID</th>
+                                <th>Previous (L)</th>
+                                <th>Current (L)</th>
+                                <th>Used (L)</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">No reports available yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            Smart Liquid Consumption &amp; Leak Detection System
+            <span>Frontend Demo · Data stored temporarily in this page</span>
+        </footer>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
