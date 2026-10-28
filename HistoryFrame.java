@@ -33,7 +33,7 @@ public class HistoryFrame extends JFrame {
 
         JTable table = new JTable(model);
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrol............lPane = new JScrollPane(table);
 
         setLayout(new BorderLayout(10, 10));
 
