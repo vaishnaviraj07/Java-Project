@@ -11,7 +11,7 @@ public class HistoryFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JLabel title = new JLabel("Previous Usage Records");
+        JLabel title = new JLabel("Previous Usage Records");mmmmmmmmmmmmmmmmm
         title.setFont(new Font("Arial", Font.BOLD, 24));
 
         String[] columns = {
