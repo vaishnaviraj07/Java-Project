@@ -8,7 +8,85 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="is-logged-out">
+
+    <!-- Login Screen (Displayed first when website opens) -->
+    <div id="loginView" class="login-view">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-brand-icon" aria-hidden="true">💧</div>
+                    <p class="eyebrow">AUTHENTICATION REQUIRED</p>
+                    <h1 class="login-title">Liquid Monitor</h1>
+                    <p class="login-subtitle">Smart Liquid Consumption &amp; Leak Detection System</p>
+                    <div class="demo-pill">
+                        <span class="demo-pill-dot"></span> System Access Portal
+                    </div>
+                </div>
+
+                <form id="loginForm" class="login-form" novalidate>
+                    <div class="form-group">
+                        <label for="loginUsername">Username</label>
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">👤</span>
+                            <input
+                                id="loginUsername"
+                                type="text"
+                                name="username"
+                                placeholder="Enter username (demo: admin)"
+                                autocomplete="username"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="input-wrap password-wrap">
+                            <span class="input-icon" aria-hidden="true">🔒</span>
+                            <input
+                                id="loginPassword"
+                                type="password"
+                                name="password"
+                                placeholder="Enter password (demo: 1234)"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                id="togglePasswordBtn"
+                                class="password-toggle-btn"
+                                aria-label="Show password"
+                                title="Show password"
+                            >
+                                👁
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="loginMessage" class="login-message" role="alert" aria-live="polite"></div>
+
+                    <button type="submit" id="loginSubmitBtn" class="primary-btn login-submit-btn">
+                        <span>Sign In</span>
+                        <span class="btn-arrow" aria-hidden="true">→</span>
+                    </button>
+
+                    <button type="button" id="fillDemoBtn" class="demo-creds-btn">
+                        <span>⚡</span> Auto-fill Demo Credentials (admin / 1234)
+                    </button>
+                </form>
+
+                <div class="login-footer-notice">
+                    <span class="notice-badge-icon" aria-hidden="true">ℹ</span>
+                    <p>
+                        <strong>Frontend Demonstration:</strong> Credentials validated locally for demo purposes only. This client-side prototype is not secure authentication.
+                    </p>
+                </div>
+            </div>
+
+            <p class="login-copyright">Smart Liquid Management · Frontend Demo</p>
+        </div>
+    </div>
 
     <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="true">☰</button>
 
@@ -45,7 +123,10 @@
         </nav>
 
         <div class="sidebar-footer">
-            <span class="status-dot"></span> System Ready
+            <div class="sidebar-status-wrap">
+                <span class="status-dot"></span> System Ready
+            </div>
+            <button id="sidebarLogoutBtn" class="sidebar-logout-btn" title="Log out and return to login page">Log Out</button>
         </div>
     </aside>
 
@@ -55,7 +136,14 @@
                 <p class="eyebrow">SMART LIQUID MANAGEMENT</p>
                 <h2>Liquid Monitor</h2>
             </div>
-            <button id="logoutBtn" class="logout-btn">Reset Session</button>
+            <div class="topbar-actions">
+                <div class="user-badge" id="topbarUserBadge">
+                    <span class="user-avatar" aria-hidden="true">👤</span>
+                    <span class="user-name" id="loggedInUserName">admin</span>
+                </div>
+                <button id="resetSessionBtn" class="secondary-btn" title="Reset temporary demo data">Reset Session</button>
+                <button id="logoutBtn" class="logout-btn">Log Out</button>
+            </div>
         </header>
 
         <section class="page active" id="dashboard">
