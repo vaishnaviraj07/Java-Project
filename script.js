@@ -451,8 +451,8 @@ $("anomalyTableBody").addEventListener("click", (event) => {
     renderAnomalies();
 });
 
-// Reset temporary demo data
-$("logoutBtn").addEventListener("click", () => {
+// Reset temporary demo data (preserves session reset feature)
+function resetSessionData() {
     const confirmed = confirm(
         "Reset this demo session? All registered liquids and usage entries will be cleared."
     );
@@ -473,8 +473,216 @@ $("logoutBtn").addEventListener("click", () => {
 
     renderAll();
     showPage("dashboard");
-});
+}
 
-// Initial setup
+const resetSessionBtn = $("resetSessionBtn");
+if (resetSessionBtn) {
+    resetSessionBtn.addEventListener("click", resetSessionData);
+}
+
+// ==========================================================================
+// Authentication & Login Page Logic (Demo Simulation)
+// ==========================================================================
+
+let isAuthenticated = false;
+
+// Display validation or status messages in the login card
+function showLoginMessage(message, isError = false, isSuccess = false) {
+    const el = $("loginMessage");
+    if (!el) return;
+
+    if (!message) {
+        el.textContent = "";
+        el.className = "login-message";
+        return;
+    }
+
+    el.textContent = message;
+    el.className = "login-message show";
+    if (isError) el.classList.add("error");
+    if (isSuccess) el.classList.add("success");
+}
+
+// Switch between Login View and Dashboard View
+function setLoginState(isLoggedIn, username = "admin") {
+    isAuthenticated = isLoggedIn;
+
+    if (isLoggedIn) {
+        document.body.classList.remove("is-logged-out");
+        document.body.classList.add("is-logged-in");
+
+        const badgeName = $("loggedInUserName");
+        if (badgeName) {
+            badgeName.textContent = username;
+        }
+
+        renderAll();
+        showPage("dashboard");
+    } else {
+        document.body.classList.remove("is-logged-in");
+        document.body.classList.add("is-logged-out");
+
+        closeMenu();
+
+        const loginForm = $("loginForm");
+        if (loginForm) loginForm.reset();
+
+        showLoginMessage("");
+
+        const usernameInput = $("loginUsername");
+        const passwordInput = $("loginPassword");
+        if (usernameInput) usernameInput.classList.remove("input-error");
+        if (passwordInput) {
+            passwordInput.classList.remove("input-error");
+            passwordInput.type = "password";
+        }
+
+        const toggleBtn = $("togglePasswordBtn");
+        if (toggleBtn) {
+            toggleBtn.textContent = "👁";
+            toggleBtn.setAttribute("aria-label", "Show password");
+            toggleBtn.setAttribute("title", "Show password");
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+}
+
+// Handle Login form submission with demo validation
+const loginForm = $("loginForm");
+if (loginForm) {
+    loginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const usernameInput = $("loginUsername");
+        const passwordInput = $("loginPassword");
+        const username = usernameInput ? usernameInput.value.trim() : "";
+        const password = passwordInput ? passwordInput.value : "";
+
+        if (usernameInput) usernameInput.classList.remove("input-error");
+        if (passwordInput) passwordInput.classList.remove("input-error");
+
+        // Validate empty fields
+        if (!username && !password) {
+            showLoginMessage("Please enter your username and password.", true);
+            if (usernameInput) {
+                usernameInput.classList.add("input-error");
+                usernameInput.focus();
+            }
+            if (passwordInput) passwordInput.classList.add("input-error");
+            return;
+        }
+
+        if (!username) {
+            showLoginMessage("Please enter your username.", true);
+            if (usernameInput) {
+                usernameInput.classList.add("input-error");
+                usernameInput.focus();
+            }
+            return;
+        }
+
+        if (!password) {
+            showLoginMessage("Please enter your password.", true);
+            if (passwordInput) {
+                passwordInput.classList.add("input-error");
+                passwordInput.focus();
+            }
+            return;
+        }
+
+        // Demo credentials check (admin / 1234, matching LoginFrame.java defaults)
+        if (username.toLowerCase() === "admin" && password === "1234") {
+            showLoginMessage("Login successful! Loading dashboard...", false, true);
+            const submitBtn = $("loginSubmitBtn");
+            if (submitBtn) submitBtn.disabled = true;
+
+            setTimeout(() => {
+                if (submitBtn) submitBtn.disabled = false;
+                setLoginState(true, username);
+            }, 350);
+        } else {
+            showLoginMessage("Invalid username or password. For demo, use: admin / 1234", true);
+            if (passwordInput) {
+                passwordInput.classList.add("input-error");
+                passwordInput.focus();
+            }
+        }
+    });
+}
+
+// Clear error messages when user modifies inputs
+const usernameField = $("loginUsername");
+if (usernameField) {
+    usernameField.addEventListener("input", () => {
+        usernameField.classList.remove("input-error");
+        showLoginMessage("");
+    });
+}
+
+const passwordField = $("loginPassword");
+if (passwordField) {
+    passwordField.addEventListener("input", () => {
+        passwordField.classList.remove("input-error");
+        showLoginMessage("");
+    });
+}
+
+// Password visibility toggle
+const togglePasswordBtn = $("togglePasswordBtn");
+if (togglePasswordBtn) {
+    togglePasswordBtn.addEventListener("click", () => {
+        const passInput = $("loginPassword");
+        if (!passInput) return;
+
+        const isPassword = passInput.type === "password";
+        passInput.type = isPassword ? "text" : "password";
+        togglePasswordBtn.textContent = isPassword ? "🙈" : "👁";
+        const label = isPassword ? "Hide password" : "Show password";
+        togglePasswordBtn.setAttribute("aria-label", label);
+        togglePasswordBtn.setAttribute("title", label);
+    });
+}
+
+// Quick fill demo credentials button
+const fillDemoBtn = $("fillDemoBtn");
+if (fillDemoBtn) {
+    fillDemoBtn.addEventListener("click", () => {
+        const usernameInput = $("loginUsername");
+        const passwordInput = $("loginPassword");
+
+        if (usernameInput && passwordInput) {
+            usernameInput.value = "admin";
+            passwordInput.value = "1234";
+            usernameInput.classList.remove("input-error");
+            passwordInput.classList.remove("input-error");
+            showLoginMessage("");
+
+            const submitBtn = $("loginSubmitBtn");
+            if (submitBtn) submitBtn.focus();
+        }
+    });
+}
+
+// Topbar & Sidebar Logout handlers (returns to login page)
+const logoutBtn = $("logoutBtn");
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        setLoginState(false);
+    });
+}
+
+const sidebarLogoutBtn = $("sidebarLogoutBtn");
+if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener("click", () => {
+        setLoginState(false);
+    });
+}
+
+// ==========================================================================
+// Initial Application Startup
+// ==========================================================================
+
+// Ensure initial state shows the login page first when opened
 renderAll();
-showPage("dashboard");
+setLoginState(false);
