@@ -38,7 +38,7 @@ public class HistoryFrame extends JFrame {
         setLayout(new BorderLayout(10, 10));
 
         add(title, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, Borde............rLayout.CENTER);
 
         setVisible(true);
     }
