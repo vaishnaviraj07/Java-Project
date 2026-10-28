@@ -137,7 +137,7 @@ public class ConsumptionCalculatorFrame extends JFrame {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Enter a valid number for Day "
+                        "Enter a valid number for a day "
                                 + (i + 1) + ".",
                         "Input Error",
                         JOptionPane.ERROR_MESSAGE
